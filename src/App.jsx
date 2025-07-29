@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import { Container, Row, Col, Card, Form, Button, Accordion, Spinner, Alert } from 'react-bootstrap';
 import L from 'leaflet';
 
-// --- UI STYLES (No changes here) ---
+// --- UI STYLES ---
 const GlobalStyles = () => (
   <style type="text/css">{`
     @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
@@ -43,7 +43,7 @@ const GlobalStyles = () => (
   `}</style>
 );
 
-// --- LEAFLET ICON FIX (No changes here) ---
+// --- LEAFLET ICON FIX ---
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
@@ -51,7 +51,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
 });
 
-// --- MAP HELPER COMPONENT (No changes here) ---
+// --- MAP HELPER COMPONENT ---
 function ChangeView({ center, zoom }) {
   const map = useMap();
   useEffect(() => {
@@ -60,7 +60,7 @@ function ChangeView({ center, zoom }) {
   return null;
 }
 
-// --- MAIN APP COMPONENT (With API Integration) ---
+// --- MAIN APP COMPONENT ---
 function App() {
   const [itinerary, setItinerary] = useState(null);
   const [destination, setDestination] = useState('');
@@ -207,7 +207,7 @@ function App() {
               </Button>
               <MapContainer center={itinerary?.center || [48.8566, 2.3522]} zoom={itinerary ? 13 : 8} style={{ height: '100%', width: '100%' }}>
                 {itinerary && <ChangeView center={itinerary.center} zoom={13} />}
-                {/* **FIXED**: Switched to the standard, reliable OpenStreetMap tile layer */}
+                {/* DEPLOYMENT FIX: Using the standard, reliable OpenStreetMap layer */}
                 <TileLayer
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

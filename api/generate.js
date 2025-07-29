@@ -20,7 +20,7 @@ export default async function handler(req, res) {
     }
 
     if (!GEMINI_API_KEY) {
-        return res.status(500).json({ error: 'API key is not configured on the server.' });
+        return res.status(500).json({ error: 'The API key is not configured on the server. Please check Vercel environment variables.' });
     }
 
     const prompt = `You are an expert travel planner. Generate a detailed travel itinerary for a trip to ${destination} for ${duration} days, focusing on the user's interests: ${interests}. Provide the response as a single, valid JSON object only, with no other text, explanations, or markdown formatting. The JSON object must follow this exact structure: {"destination": "${destination}","duration": ${duration},"center": [latitude, longitude],"days": [{"day": 1,"theme": "A short, catchy theme for the day's activities","locations": [{"name": "Location Name","coords": [latitude, longitude],"time": "Suggested Time (e.g., 9:00 AM - 11:00 AM)","description": "A brief, one or two-sentence description of the place and why to visit."}]}]}. Ensure all fields are filled. The 'center' field should be the geographical center of the destination city. The 'coords' must be accurate latitude and longitude arrays for each location.`;
