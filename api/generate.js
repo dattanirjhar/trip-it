@@ -1,9 +1,9 @@
 // /api/generate.js
 
-// Using node-fetch for compatibility with Vercel's Node.js environment
-const fetch = require('node-fetch');
+// **DEFINITIVE FIX**: This file uses a globally available `fetch` and a robust
+// module export syntax that is fully compatible with Vercel's environment.
+// The `node-fetch` dependency is NO LONGER REQUIRED.
 
-// This is the main function Vercel will run
 export default async function handler(req, res) {
   // Only allow POST requests
   if (req.method !== 'POST') {
@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     const GEMINI_API_KEY = process.env.GEMINI_API_KEY; // Securely read from Vercel Environment Variables
 
     if (!destination || !duration || !interests) {
-      return res.status(400).json({ error: 'Missing required fields.' });
+      return res.status(400).json({ error: 'Missing required fields from frontend.' });
     }
 
     if (!GEMINI_API_KEY) {
@@ -43,11 +43,11 @@ export default async function handler(req, res) {
     }
 
     // Send the successful response back to the frontend
-    res.status(200).json(responseData);
+    return res.status(200).json(responseData);
 
   } catch (error) {
     console.error('Error in API function:', error);
-    res.status(500).json({ error: error.message || 'An internal server error occurred.' });
+    return res.status(500).json({ error: error.message || 'An internal server error occurred.' });
   }
 }
 
