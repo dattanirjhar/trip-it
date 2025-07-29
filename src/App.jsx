@@ -37,7 +37,7 @@ const GlobalStyles = () => (
     .sidebar .accordion-body .card-subtitle { font-size: 0.8rem; color: #e2e8f0; }
     .sidebar .accordion-body .card-text { font-size: 0.875rem; font-weight: 400; color: white; }
     .map-column { height: 100%; position: relative; }
-    .leaflet-container { background: #0f172a; }
+    .leaflet-container { background: #e5e7eb; }
     @media (max-width: 991.98px) { .sidebar { position: absolute; top: 0; left: 0; width: 85%; max-width: 380px; z-index: 1020; transform: translateX(-100%); box-shadow: 0 0 25px rgba(0,0,0,0.3); } .sidebar.visible { transform: translateX(0); } }
     .mobile-toggle-button { position: absolute; top: 15px; left: 15px; z-index: 1001; background-color: white; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; padding: 8px 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
   `}</style>
@@ -62,8 +62,6 @@ function ChangeView({ center, zoom }) {
 
 // --- MAIN APP COMPONENT (With API Integration) ---
 function App() {
-  // API Key is now stored on the backend, so we remove it from here.
-
   const [itinerary, setItinerary] = useState(null);
   const [destination, setDestination] = useState('');
   const [duration, setDuration] = useState(3);
@@ -84,23 +82,19 @@ function App() {
     setError(null);
     setItinerary(null);
 
-    // **UPDATED**: The URL now points to our Vercel serverless function.
     const backendUrl = '/api/generate';
 
     try {
       const response = await fetch(backendUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        // Send the user's input to our server.
         body: JSON.stringify({ destination, duration, interests })
       });
 
       const responseData = await response.json();
 
-      // **UPDATED**: Handle errors coming from our own server.
       if (!response.ok) {
         console.error("Backend Server Error:", responseData);
-        // Display the specific error message our server sent back.
         throw new Error(responseData.error || `Request failed with status ${response.status}`);
       }
       
@@ -213,9 +207,10 @@ function App() {
               </Button>
               <MapContainer center={itinerary?.center || [48.8566, 2.3522]} zoom={itinerary ? 13 : 8} style={{ height: '100%', width: '100%' }}>
                 {itinerary && <ChangeView center={itinerary.center} zoom={13} />}
+                {/* **FIXED**: Switched to the standard, reliable OpenStreetMap tile layer */}
                 <TileLayer
-                  url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"
-                  attribution='&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 />
                 {itinerary?.days.flatMap(day => day.locations).map((location, index) => (
                   <Marker position={location.coords} key={index}>
