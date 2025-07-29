@@ -84,5 +84,5 @@ This project is optimized for a seamless deployment with Vercel.
 
 ### License
 
-This project uses a MIT License. Visit `LICENCE.md` for more info
+This project uses a GNU General Public License. Visit `LICENCE.md` for more info
 
