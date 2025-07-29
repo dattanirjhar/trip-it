@@ -82,3 +82,7 @@ This project is optimized for a seamless deployment with Vercel.
 4.  **Deploy:**
       * Click the "Deploy" button. Vercel will build your React app and deploy your `api/generate.js` file as a serverless function. Your site will be live in minutes\!
 
+### License
+
+This project uses a MIT License. Visit `LICENCE.md` for more info
+
