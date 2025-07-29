@@ -39,7 +39,7 @@ const GlobalStyles = () => (
     .map-column { height: 100%; position: relative; }
     .leaflet-container { background: #0f172a; }
     @media (max-width: 991.98px) { .sidebar { position: absolute; top: 0; left: 0; width: 85%; max-width: 380px; z-index: 1020; transform: translateX(-100%); box-shadow: 0 0 25px rgba(0,0,0,0.3); } .sidebar.visible { transform: translateX(0); } }
-    .mobile-toggle-button { position: absolute; top: 15px; left: 15px; z-index: 1001; background-color: white; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; padding: 8px 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+    .mobile-toggle-button { position: absolute; top: 15px; left: 15px; z-index: 1001; background-color: white; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; padding: 8px 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
   `}</style>
 );
 
@@ -62,11 +62,7 @@ function ChangeView({ center, zoom }) {
 
 // --- MAIN APP COMPONENT (With API Integration) ---
 function App() {
-  // ==================================================================
-  // 1. PASTE YOUR GEMINI API KEY HERE
-  // ==================================================================
-  const API_KEY = "AIzaSyBk-W7d6pvj9j-jgW6B2zOF-tR1FfYRNCM";
-  // ==================================================================
+  // API Key is now stored on the backend, so we remove it from here.
 
   const [itinerary, setItinerary] = useState(null);
   const [destination, setDestination] = useState('');
@@ -77,73 +73,60 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const createPrompt = (destination, duration, interests) => {
-    return `You are an expert travel planner. Generate a detailed travel itinerary for a trip to ${destination} for ${duration} days, focusing on the user's interests: ${interests}. Provide the response as a single, valid JSON object only, with no other text, explanations, or markdown formatting. The JSON object must follow this exact structure: {"destination": "${destination}","duration": ${duration},"center": [latitude, longitude],"days": [{"day": 1,"theme": "A short, catchy theme for the day's activities","locations": [{"name": "Location Name","coords": [latitude, longitude],"time": "Suggested Time (e.g., 9:00 AM - 11:00 AM)","description": "A brief, one or two-sentence description of the place and why to visit."}]}]}. Ensure all fields are filled. The 'center' field should be the geographical center of the destination city. The 'coords' must be accurate latitude and longitude arrays for each location.`;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!destination) {
       setError("Please enter a destination.");
       return;
     }
-    if (API_KEY === "YOUR_GEMINI_API_KEY_GOES_HERE") {
-        setError("Please add your Gemini API key to the App.jsx file.");
-        return;
-    }
 
     setIsLoading(true);
     setError(null);
     setItinerary(null);
 
-    const prompt = createPrompt(destination, duration, interests);
-    // **FIXED**: Using the latest, correct model name for Flash.
-    const modelName = "gemini-1.5-flash-latest";
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${API_KEY}`;
+    // **UPDATED**: The URL now points to our Vercel serverless function.
+    const backendUrl = '/api/generate';
 
     try {
-      const response = await fetch(apiUrl, {
+      const response = await fetch(backendUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        // Send the user's input to our server.
+        body: JSON.stringify({ destination, duration, interests })
       });
 
       const responseData = await response.json();
 
-      // **ROBUST ERROR HANDLING**: Check the response first.
+      // **UPDATED**: Handle errors coming from our own server.
       if (!response.ok) {
-        console.error("API Error Response:", responseData);
-        // Provide the specific error message from Google's server.
-        const errorDetails = responseData.error?.message || `API request failed with status ${response.status}`;
-        throw new Error(`API Error: ${errorDetails}`);
+        console.error("Backend Server Error:", responseData);
+        // Display the specific error message our server sent back.
+        throw new Error(responseData.error || `Request failed with status ${response.status}`);
       }
       
-      // Check if the AI provided a valid response.
-      if (!responseData.candidates || responseData.candidates.length === 0) {
+      if (responseData.candidates && responseData.candidates.length > 0) {
+        const rawText = responseData.candidates[0].content.parts[0].text;
+        
+        const startIndex = rawText.indexOf('{');
+        const endIndex = rawText.lastIndexOf('}');
+        
+        if (startIndex === -1 || endIndex === -1) {
+          throw new Error("The AI response did not contain a valid JSON object.");
+        }
+
+        const jsonString = rawText.substring(startIndex, endIndex + 1);
+        
+        try {
+            const newItinerary = JSON.parse(jsonString);
+            setItinerary(newItinerary);
+        } catch (parseError) {
+            console.error("JSON Parsing Error:", parseError, "--- Raw Text:", rawText);
+            throw new Error("Failed to parse the itinerary from the AI response. See console for details.");
+        }
+
+      } else {
         console.error("API response missing candidates:", responseData);
         throw new Error("The AI did not return a valid itinerary. This might be due to a safety filter. Please adjust your input and try again.");
-      }
-
-      const rawText = responseData.candidates[0].content.parts[0].text;
-      
-      // **ROBUST JSON PARSING**: Find the JSON block within the response text.
-      const startIndex = rawText.indexOf('{');
-      const endIndex = rawText.lastIndexOf('}');
-      
-      if (startIndex === -1 || endIndex === -1) {
-        console.error("Could not find JSON in text:", rawText);
-        throw new Error("The AI response did not contain a valid JSON object.");
-      }
-
-      const jsonString = rawText.substring(startIndex, endIndex + 1);
-      
-      // Try to parse the extracted JSON string.
-      try {
-          const newItinerary = JSON.parse(jsonString);
-          setItinerary(newItinerary);
-      } catch (parseError) {
-          console.error("JSON Parsing Error:", parseError, "--- Raw Text:", rawText);
-          throw new Error("Failed to parse the itinerary from the AI response. See console for details.");
       }
 
     } catch (err) {
