@@ -16,7 +16,7 @@ const GlobalStyles = () => (
     .app-container { display: flex; flex-direction: column; height: 100vh; width: 100%; }
     .app-header { background-color: var(--header-bg); color: var(--sidebar-text); padding: 0.75rem 1.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1); z-index: 10; border-bottom: 1px solid var(--card-bg); }
     .app-header h1 { font-size: 1.85rem; font-weight: 800; letter-spacing: 0.05em; }
-    .content-wrapper { flex-grow: 1; overflow: hidden; }
+    .content-wrapper { flex-grow: 1; overflow: hidden; position: relative; /* Added for stacking context */ }
     .sidebar { height: 100%; overflow-y: auto; background-color: var(--sidebar-bg); color: var(--sidebar-text); border-right: 1px solid var(--border-color); transition: transform 0.3s ease-in-out; padding: 1.5rem; }
     .sidebar .card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 0.5rem; }
     .sidebar .card .card-title { font-size: 1.3rem; font-weight: 700; color: var(--sidebar-text); }
@@ -43,12 +43,11 @@ const GlobalStyles = () => (
     
     /* Animation Keyframes */
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
-
+    
     /* Sleek Mobile Button Styles */
     .mobile-fab { /* Floating Action Button */
-      position: fixed; /* Use fixed to position relative to viewport */
-      z-index: 1001;
+      position: absolute; /* Changed to absolute to stay within content-wrapper */
+      z-index: 1030; /* **FIX**: Increased z-index to be above the sidebar */
       background-color: white;
       color: black;
       border: none;
@@ -162,7 +161,6 @@ function App() {
       setIsLoading(false);
     }
 
-    // Keep the sidebar open on mobile after generation to show the result
     if (window.innerWidth < 992) {
       setSidebarVisible(true);
     }
