@@ -10,13 +10,15 @@ const GlobalStyles = () => (
     /* High-Contrast Monochrome Dark Color Scheme */
     :root {
       --header-bg: #040404; --sidebar-bg: #1c1c1c; --card-bg: #4c4c4c; --accent-color: #6f6f6f; --accent-hover: #ececec; --sidebar-text: #ececec; --border-color: #4c4c4c; --body-bg: #040404;
+      /* **FIX**: This variable will hold the actual screen height */
+      --app-height: 100vh;
     }
     html, body, #root { height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden; font-family: 'Nunito', sans-serif; background-color: var(--body-bg); font-size: 16px; }
     #root { max-width: 100%; text-align: left; }
-    .app-container { display: flex; flex-direction: column; height: 100vh; width: 100%; }
+    .app-container { display: flex; flex-direction: column; /* **FIX**: Use the dynamic app height */ height: var(--app-height); width: 100%; }
     .app-header { background-color: var(--header-bg); color: var(--sidebar-text); padding: 0.75rem 1.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1); z-index: 10; border-bottom: 1px solid var(--card-bg); }
     .app-header h1 { font-size: 1.85rem; font-weight: 800; letter-spacing: 0.05em; }
-    .content-wrapper { flex-grow: 1; overflow: hidden; position: relative; /* Added for stacking context */ }
+    .content-wrapper { flex-grow: 1; overflow: hidden; position: relative; }
     .sidebar { height: 100%; overflow-y: auto; background-color: var(--sidebar-bg); color: var(--sidebar-text); border-right: 1px solid var(--border-color); transition: transform 0.3s ease-in-out; padding: 1.5rem; }
     .sidebar .card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 0.5rem; }
     .sidebar .card .card-title { font-size: 1.3rem; font-weight: 700; color: var(--sidebar-text); }
@@ -39,14 +41,31 @@ const GlobalStyles = () => (
     .sidebar .accordion-body .card-text { font-size: 0.875rem; font-weight: 400; color: var(--sidebar-text); }
     .map-column { height: 100%; position: relative; }
     .leaflet-container { background: #111827; }
-    @media (max-width: 991.98px) { .sidebar { position: absolute; top: 0; left: 0; width: 85%; max-width: 380px; z-index: 1020; transform: translateX(-100%); box-shadow: 0 0 25px rgba(0,0,0,0.3); } .sidebar.visible { transform: translateX(0); } }
+    
+    /* **FIX**: Updated mobile sidebar to be a full overlay */
+    @media (max-width: 991.98px) {
+      .sidebar {
+        position: fixed; /* Changed to fixed for full overlay */
+        top: 0;
+        left: 0;
+        width: 85%;
+        max-width: 380px;
+        height: 100%; /* Cover full screen height */
+        z-index: 1020;
+        transform: translateX(-100%);
+        box-shadow: 0 0 25px rgba(0,0,0,0.5);
+      }
+      .sidebar.visible {
+        transform: translateX(0);
+      }
+    }
     
     /* Animation Keyframes */
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     
     /* Sleek Mobile Button Styles */
     .mobile-fab { /* Floating Action Button */
-      position: absolute; /* Changed to absolute to stay within content-wrapper */
+      position: fixed; /* Changed to fixed to stay in place */
       z-index: 1030; /* **FIX**: Increased z-index to be above the sidebar */
       background-color: white;
       color: black;
@@ -99,6 +118,17 @@ function App() {
   
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const setAppHeight = () => {
+      document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
+    };
+    window.addEventListener('resize', setAppHeight);
+    setAppHeight();
+
+    return () => window.removeEventListener('resize', setAppHeight);
+  }, []);
+
 
   const stadiaApiKey = import.meta.env.VITE_STADIA_API_KEY;
 
@@ -174,6 +204,28 @@ function App() {
           <h1>TRIP IT!</h1>
         </header>
 
+        {/* **FIX**: Mobile buttons are moved outside the main layout for proper layering */}
+        {!isSidebarVisible && (
+          <Button 
+            className="d-lg-none mobile-fab mobile-open-button" 
+            onClick={() => setSidebarVisible(true)}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+              <path fillRule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>
+            </svg>
+          </Button>
+        )}
+        {isSidebarVisible && (
+            <Button 
+            className="d-lg-none mobile-fab mobile-close-button"
+            onClick={() => setSidebarVisible(false)}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+            </svg>
+          </Button>
+        )}
+
         <Container fluid className="content-wrapper">
           <Row className="g-0 h-100">
             {/* Left Panel: Itinerary Details (Sidebar) */}
@@ -230,28 +282,6 @@ function App() {
 
             {/* Right Panel: Interactive Map */}
             <Col lg={8} xs={12} className="map-column">
-              {/* Mobile Buttons with conditional rendering for animations */}
-              {!isSidebarVisible && (
-                <Button 
-                  className="d-lg-none mobile-fab mobile-open-button" 
-                  onClick={() => setSidebarVisible(true)}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-                    <path fillRule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>
-                  </svg>
-                </Button>
-              )}
-              {isSidebarVisible && (
-                 <Button 
-                  className="d-lg-none mobile-fab mobile-close-button"
-                  onClick={() => setSidebarVisible(false)}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
-                  </svg>
-                </Button>
-              )}
-
               <MapContainer center={itinerary?.center || [48.8566, 2.3522]} zoom={itinerary ? 13 : 8} style={{ height: '100%', width: '100%' }}>
                 {itinerary && <ChangeView center={itinerary.center} zoom={13} />}
                 <TileLayer
