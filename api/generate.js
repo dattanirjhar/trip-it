@@ -20,23 +20,22 @@ module.exports = async (req, res) => {
         return res.status(500).json({ error: 'The API key is not configured on the server. Please check Vercel environment variables.' });
     }
 
-    // Enhanced prompt with instructions for handling bad input.
+    // **FIXED**: Simplified the prompt to be less strict and more effective.
     const prompt = `
-      You are an expert travel planner. Your task is to generate a detailed travel itinerary.
-      
+      You are an expert travel planner. Your task is to generate a detailed travel itinerary based on the user's input.
+
       **User Input:**
       - Destination: "${destination}"
       - Trip Duration: ${duration} days
       - Interests: "${interests}"
 
       **Instructions:**
-      1.  First, analyze the user's input. If the destination or interests seem nonsensical, like a keyboard mash (e.g., "asdfgh"), random unrelated objects (e.g., "chairs, lamps"), slurs, or are not plausible for a travel request, you MUST NOT generate an itinerary. Instead, you must return a JSON object with this exact error structure: 
-          {"error": "Invalid input. Please provide a real destination and interests."}
-
-      2.  If the input is valid, generate the itinerary and provide the response as a single, valid JSON object only, with no other text, explanations, or markdown formatting. The JSON object must follow this exact structure:
+      - Provide the response as a single, valid JSON object only, with no other text, explanations, or markdown formatting.
+      - The JSON object must follow this exact structure:
           {"destination": "${destination}","duration": ${duration},"center": [latitude, longitude],"days": [{"day": 1,"theme": "A short, catchy theme for the day's activities","locations": [{"name": "Location Name","coords": [latitude, longitude],"time": "Suggested Time (e.g., 9:00 AM - 11:00 AM)","description": "A brief, one or two-sentence description of the place and why to visit."}]}]}
       
-      Ensure all fields are filled correctly for a valid itinerary. The 'center' field must be the geographical center of the destination, and 'coords' must be accurate latitude/longitude arrays.
+      - If the provided destination is not a real place, return a JSON object with this error structure: {"error": "Please provide a real destination."}
+      - Ensure all fields are filled correctly for a valid itinerary. The 'center' field must be the geographical center of the destination, and 'coords' must be accurate latitude/longitude arrays.
     `;
 
     const modelName = "gemini-1.5-flash-latest";
