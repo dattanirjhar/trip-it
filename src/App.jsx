@@ -10,16 +10,19 @@ const GlobalStyles = () => (
     /* High-Contrast Monochrome Dark Color Scheme */
     :root {
       --header-bg: #040404; --sidebar-bg: #1c1c1c; --card-bg: #4c4c4c; --accent-color: #6f6f6f; --accent-hover: #ececec; --sidebar-text: #ececec; --border-color: #4c4c4c; --body-bg: #040404;
-      /* **FIX**: This variable will hold the actual screen height */
       --app-height: 100vh;
+    }
+    /* **FIX**: Lock the body from scrolling when the overlay is active */
+    body.sidebar-open {
+      overflow: hidden;
     }
     html, body, #root { height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden; font-family: 'Nunito', sans-serif; background-color: var(--body-bg); font-size: 16px; }
     #root { max-width: 100%; text-align: left; }
-    .app-container { display: flex; flex-direction: column; /* **FIX**: Use the dynamic app height */ height: var(--app-height); width: 100%; }
+    .app-container { display: flex; flex-direction: column; height: var(--app-height); width: 100%; }
     .app-header { background-color: var(--header-bg); color: var(--sidebar-text); padding: 0.75rem 1.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1); z-index: 10; border-bottom: 1px solid var(--card-bg); }
     .app-header h1 { font-size: 1.85rem; font-weight: 800; letter-spacing: 0.05em; }
     .content-wrapper { flex-grow: 1; overflow: hidden; position: relative; }
-    .sidebar { height: 100%; overflow-y: auto; background-color: var(--sidebar-bg); color: var(--sidebar-text); border-right: 1px solid var(--border-color); transition: transform 0.3s ease-in-out; padding: 1.5rem; }
+    .sidebar { height: 100%; overflow-y: auto; background-color: var(--sidebar-bg); color: var(--sidebar-text); border-right: 1px solid var(--border-color); transition: transform 0.3s ease-in-out; padding: 1.5rem; /* **FIX**: Prevent scroll chaining */ overscroll-behavior: contain; }
     .sidebar .card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 0.5rem; }
     .sidebar .card .card-title { font-size: 1.3rem; font-weight: 700; color: var(--sidebar-text); }
     .sidebar .form-label { font-weight: 600; color: var(--sidebar-text); font-size: 0.9rem; }
@@ -42,15 +45,14 @@ const GlobalStyles = () => (
     .map-column { height: 100%; position: relative; }
     .leaflet-container { background: #111827; }
     
-    /* **FIX**: Updated mobile sidebar to be a full overlay */
     @media (max-width: 991.98px) {
       .sidebar {
-        position: fixed; /* Changed to fixed for full overlay */
+        position: fixed;
         top: 0;
         left: 0;
         width: 85%;
         max-width: 380px;
-        height: 100%; /* Cover full screen height */
+        height: var(--app-height); /* Use dynamic height */
         z-index: 1020;
         transform: translateX(-100%);
         box-shadow: 0 0 25px rgba(0,0,0,0.5);
@@ -65,8 +67,8 @@ const GlobalStyles = () => (
     
     /* Sleek Mobile Button Styles */
     .mobile-fab { /* Floating Action Button */
-      position: fixed; /* Changed to fixed to stay in place */
-      z-index: 1030; /* **FIX**: Increased z-index to be above the sidebar */
+      position: fixed;
+      z-index: 1030;
       background-color: white;
       color: black;
       border: none;
@@ -128,6 +130,14 @@ function App() {
 
     return () => window.removeEventListener('resize', setAppHeight);
   }, []);
+
+  useEffect(() => {
+    if (isSidebarVisible && window.innerWidth < 992) {
+      document.body.classList.add('sidebar-open');
+    } else {
+      document.body.classList.remove('sidebar-open');
+    }
+  }, [isSidebarVisible]);
 
 
   const stadiaApiKey = import.meta.env.VITE_STADIA_API_KEY;
@@ -204,7 +214,6 @@ function App() {
           <h1>TRIP IT!</h1>
         </header>
 
-        {/* **FIX**: Mobile buttons are moved outside the main layout for proper layering */}
         {!isSidebarVisible && (
           <Button 
             className="d-lg-none mobile-fab mobile-open-button" 
