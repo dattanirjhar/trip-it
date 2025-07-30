@@ -8,7 +8,7 @@ const GlobalStyles = () => (
   <style type="text/css">{`
     @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
     :root {
-      --header-bg: #332D56; --sidebar-bg: #4E6688; --card-bg: #332D56; --accent-color: #E3EEB2; --accent-hover: #71C0BB; --sidebar-text: #f8fafc; --border-color: #4E6688; --body-bg: #f1f5f9;
+      --header-bg: #1d1d1b; --sidebar-bg: #b4b4b3; --card-bg: #1d1d1b; --accent-color: #686867; --accent-hover: #434341; --sidebar-text: #f8fafc; --border-color: #4E6688; --body-bg: #f1f5f9;
     }
     html, body, #root { height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden; font-family: 'Nunito', sans-serif; background-color: var(--body-bg); font-size: 16px; }
     #root { max-width: 100%; text-align: left; }
