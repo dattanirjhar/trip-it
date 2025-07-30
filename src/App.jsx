@@ -7,37 +7,45 @@ import L from 'leaflet';
 const GlobalStyles = () => (
   <style type="text/css">{`
     @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+    /* Updated High-Contrast Monochrome Dark Color Scheme */
     :root {
-      --header-bg: #1d1d1b; --sidebar-bg: #b4b4b3; --card-bg: #1d1d1b; --accent-color: #686867; --accent-hover: #434341; --sidebar-text: #f8fafc; --border-color: #4E6688; --body-bg: #f1f5f9;
+      --header-bg: #040404;      /* Black */
+      --sidebar-bg: #1c1c1c;     /* Almost Black */
+      --card-bg: #4c4c4c;         /* Dark Gray */
+      --accent-color: #6f6f6f;     /* Medium Gray */
+      --accent-hover: #ececec;    /* Light Gray */
+      --sidebar-text: #ececec;   /* Light Gray */
+      --border-color: #4c4c4c;   /* Dark Gray */
+      --body-bg: #040404;
     }
     html, body, #root { height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden; font-family: 'Nunito', sans-serif; background-color: var(--body-bg); font-size: 16px; }
     #root { max-width: 100%; text-align: left; }
     .app-container { display: flex; flex-direction: column; height: 100vh; width: 100%; }
-    .app-header { background-color: var(--header-bg); color: white; padding: 0.75rem 1.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1); z-index: 10; }
+    .app-header { background-color: var(--header-bg); color: var(--sidebar-text); padding: 0.75rem 1.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1); z-index: 10; border-bottom: 1px solid var(--card-bg); }
     .app-header h1 { font-size: 1.85rem; font-weight: 800; letter-spacing: 0.05em; }
     .content-wrapper { flex-grow: 1; overflow: hidden; }
     .sidebar { height: 100%; overflow-y: auto; background-color: var(--sidebar-bg); color: var(--sidebar-text); border-right: 1px solid var(--border-color); transition: transform 0.3s ease-in-out; padding: 1.5rem; }
-    .sidebar .card { background-color: var(--card-bg); border: none; border-radius: 0.5rem; }
-    .sidebar .card .card-title { font-size: 1.3rem; font-weight: 700; }
+    .sidebar .card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 0.5rem; }
+    .sidebar .card .card-title { font-size: 1.3rem; font-weight: 700; color: var(--sidebar-text); }
     .sidebar .form-label { font-weight: 600; color: var(--sidebar-text); font-size: 0.9rem; }
-    .sidebar .form-control { background-color: var(--sidebar-bg); color: white; border: 1px solid var(--border-color); border-radius: 0.375rem; }
-    .sidebar .form-control::placeholder { color: #cbd5e1; }
-    .sidebar .form-control:focus { background-color: var(--sidebar-bg); color: white; border-color: var(--accent-color); box-shadow: 0 0 0 0.25rem rgba(227, 238, 178, 0.25); }
+    .sidebar .form-control { background-color: var(--sidebar-bg); color: var(--sidebar-text); border: 1px solid var(--border-color); border-radius: 0.375rem; }
+    .sidebar .form-control::placeholder { color: #9CA3AF; }
+    .sidebar .form-control:focus { background-color: var(--sidebar-bg); color: var(--sidebar-text); border-color: var(--accent-color); box-shadow: 0 0 0 0.25rem rgba(156, 163, 175, 0.25); }
     .sidebar .btn-primary { background-color: var(--accent-color); border-color: var(--accent-color); color: var(--header-bg); font-weight: 700; width: 100%; padding: 0.75rem; border-radius: 0.375rem; transition: background-color 0.2s, color 0.2s; }
-    .sidebar .btn-primary:hover { background-color: var(--accent-hover); border-color: var(--accent-hover); color: white; }
-    .sidebar .btn-primary:disabled { background-color: #d1d5db; border-color: #d1d5db; }
-    .itinerary-title { font-size: 1.2rem; font-weight: 700; }
+    .sidebar .btn-primary:hover { background-color: var(--accent-hover); border-color: var(--accent-hover); color: var(--header-bg); }
+    .sidebar .btn-primary:disabled { background-color: #4B5563; border-color: #4B5563; color: #9CA3AF; }
+    .itinerary-title { font-size: 1.2rem; font-weight: 700; color: var(--sidebar-text); }
     .sidebar .accordion, .sidebar .accordion-item { background-color: transparent; border: none; color: var(--sidebar-text); }
     .sidebar .accordion-item { margin-bottom: 1rem; border: 1px solid var(--border-color); border-radius: 0.5rem; overflow: hidden; background-color: var(--card-bg); }
-    .sidebar .accordion-header button { background-color: var(--card-bg); color: white; font-weight: 700; font-size: 1.05rem; }
+    .sidebar .accordion-header button { background-color: var(--card-bg); color: var(--sidebar-text); font-weight: 700; font-size: 1.05rem; }
     .sidebar .accordion-header button:not(.collapsed) { background-color: var(--accent-color); color: var(--header-bg); }
     .sidebar .accordion-body { background-color: var(--sidebar-bg); padding: 1rem; }
-    .sidebar .accordion-body .card { background-color: var(--sidebar-bg); }
-    .sidebar .accordion-body .card-title { font-size: 1.05rem; font-weight: 700; color: white; }
-    .sidebar .accordion-body .card-subtitle { font-size: 0.8rem; color: #e2e8f0; }
-    .sidebar .accordion-body .card-text { font-size: 0.875rem; font-weight: 400; color: white; }
+    .sidebar .accordion-body .card { background-color: var(--sidebar-bg); border: none; }
+    .sidebar .accordion-body .card-title { font-size: 1.05rem; font-weight: 700; color: var(--sidebar-text); }
+    .sidebar .accordion-body .card-subtitle { font-size: 0.8rem; color: #D1D5DB; }
+    .sidebar .accordion-body .card-text { font-size: 0.875rem; font-weight: 400; color: var(--sidebar-text); }
     .map-column { height: 100%; position: relative; }
-    .leaflet-container { background: #FFFFFF; } /* Updated for new map style */
+    .leaflet-container { background: #111827; }
     @media (max-width: 991.98px) { .sidebar { position: absolute; top: 0; left: 0; width: 85%; max-width: 380px; z-index: 1020; transform: translateX(-100%); box-shadow: 0 0 25px rgba(0,0,0,0.3); } .sidebar.visible { transform: translateX(0); } }
     .mobile-toggle-button { position: absolute; top: 15px; left: 15px; z-index: 1001; background-color: white; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; padding: 8px 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
   `}</style>
@@ -152,7 +160,7 @@ function App() {
             <Col lg={4} className={`sidebar d-lg-block ${isSidebarVisible ? 'visible' : ''}`}>
               <Card className="mb-4">
                 <Card.Body>
-                  <Card.Title className="text-white mb-3">Plan Your Next Adventure</Card.Title>
+                  <Card.Title className="mb-3">Plan Your Next Adventure</Card.Title>
                   <Form onSubmit={handleSubmit}>
                     <Form.Group className="mb-3">
                       <Form.Label>Destination</Form.Label>
@@ -177,7 +185,7 @@ function App() {
 
               {itinerary && (
                 <>
-                  <h4 className="mb-3 mt-4 text-white itinerary-title">{itinerary.destination} - {itinerary.duration} Day Itinerary</h4>
+                  <h4 className="mb-3 mt-4 itinerary-title">{itinerary.destination} - {itinerary.duration} Day Itinerary</h4>
                   <Accordion defaultActiveKey="0" alwaysOpen>
                     {itinerary.days.map((day, index) => (
                       <Accordion.Item eventKey={index.toString()} key={day.day}>
