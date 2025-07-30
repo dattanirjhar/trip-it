@@ -209,9 +209,9 @@ function App() {
                 {itinerary && <ChangeView center={itinerary.center} zoom={13} />}
                 {/* DEPLOYMENT FIX: Using the standard, reliable OpenStreetMap layer */}
                 <TileLayer
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                />
+                  url="https://tiles.stadiamaps.com/tiles/stamen_toner/{z}/{x}/{y}{r}.png"
+                  attribution= '&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://stamen.com/" target="_blank">Stamen Design</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
+                    />
                 {itinerary?.days.flatMap(day => day.locations).map((location, index) => (
                   <Marker position={location.coords} key={index}>
                     <Popup>
