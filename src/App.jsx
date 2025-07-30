@@ -7,16 +7,9 @@ import L from 'leaflet';
 const GlobalStyles = () => (
   <style type="text/css">{`
     @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
-    /* Updated High-Contrast Monochrome Dark Color Scheme */
+    /* High-Contrast Monochrome Dark Color Scheme */
     :root {
-      --header-bg: #040404;      /* Black */
-      --sidebar-bg: #1c1c1c;     /* Almost Black */
-      --card-bg: #4c4c4c;         /* Dark Gray */
-      --accent-color: #6f6f6f;     /* Medium Gray */
-      --accent-hover: #ececec;    /* Light Gray */
-      --sidebar-text: #ececec;   /* Light Gray */
-      --border-color: #4c4c4c;   /* Dark Gray */
-      --body-bg: #040404;
+      --header-bg: #040404; --sidebar-bg: #1c1c1c; --card-bg: #4c4c4c; --accent-color: #6f6f6f; --accent-hover: #ececec; --sidebar-text: #ececec; --border-color: #4c4c4c; --body-bg: #040404;
     }
     html, body, #root { height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden; font-family: 'Nunito', sans-serif; background-color: var(--body-bg); font-size: 16px; }
     #root { max-width: 100%; text-align: left; }
@@ -47,7 +40,36 @@ const GlobalStyles = () => (
     .map-column { height: 100%; position: relative; }
     .leaflet-container { background: #111827; }
     @media (max-width: 991.98px) { .sidebar { position: absolute; top: 0; left: 0; width: 85%; max-width: 380px; z-index: 1020; transform: translateX(-100%); box-shadow: 0 0 25px rgba(0,0,0,0.3); } .sidebar.visible { transform: translateX(0); } }
-    .mobile-toggle-button { position: absolute; top: 15px; left: 15px; z-index: 1001; background-color: white; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; padding: 8px 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+    
+    /* Animation Keyframes */
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+
+    /* Sleek Mobile Button Styles */
+    .mobile-fab { /* Floating Action Button */
+      position: fixed; /* Use fixed to position relative to viewport */
+      z-index: 1001;
+      background-color: white;
+      color: black;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+      cursor: pointer;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    .mobile-open-button {
+      top: 15px;
+      left: 15px;
+    }
+    .mobile-close-button {
+      top: 15px;
+      right: 15px;
+    }
   `}</style>
 );
 
@@ -79,7 +101,6 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Securely get the Stadia Maps API key from environment variables
   const stadiaApiKey = import.meta.env.VITE_STADIA_API_KEY;
 
   const handleSubmit = async (e) => {
@@ -141,8 +162,9 @@ function App() {
       setIsLoading(false);
     }
 
+    // Keep the sidebar open on mobile after generation to show the result
     if (window.innerWidth < 992) {
-      setSidebarVisible(false);
+      setSidebarVisible(true);
     }
   };
 
@@ -210,12 +232,28 @@ function App() {
 
             {/* Right Panel: Interactive Map */}
             <Col lg={8} xs={12} className="map-column">
-              <Button 
-                className="d-lg-none mobile-toggle-button" 
-                onClick={() => setSidebarVisible(!isSidebarVisible)}
-              >
-                {isSidebarVisible ? 'Hide' : 'Show'} Itinerary
-              </Button>
+              {/* Mobile Buttons with conditional rendering for animations */}
+              {!isSidebarVisible && (
+                <Button 
+                  className="d-lg-none mobile-fab mobile-open-button" 
+                  onClick={() => setSidebarVisible(true)}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                    <path fillRule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>
+                  </svg>
+                </Button>
+              )}
+              {isSidebarVisible && (
+                 <Button 
+                  className="d-lg-none mobile-fab mobile-close-button"
+                  onClick={() => setSidebarVisible(false)}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                  </svg>
+                </Button>
+              )}
+
               <MapContainer center={itinerary?.center || [48.8566, 2.3522]} zoom={itinerary ? 13 : 8} style={{ height: '100%', width: '100%' }}>
                 {itinerary && <ChangeView center={itinerary.center} zoom={13} />}
                 <TileLayer
