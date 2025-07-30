@@ -37,7 +37,7 @@ const GlobalStyles = () => (
     .sidebar .accordion-body .card-subtitle { font-size: 0.8rem; color: #e2e8f0; }
     .sidebar .accordion-body .card-text { font-size: 0.875rem; font-weight: 400; color: white; }
     .map-column { height: 100%; position: relative; }
-    .leaflet-container { background: #e5e7eb; }
+    .leaflet-container { background: #FFFFFF; } /* Updated for new map style */
     @media (max-width: 991.98px) { .sidebar { position: absolute; top: 0; left: 0; width: 85%; max-width: 380px; z-index: 1020; transform: translateX(-100%); box-shadow: 0 0 25px rgba(0,0,0,0.3); } .sidebar.visible { transform: translateX(0); } }
     .mobile-toggle-button { position: absolute; top: 15px; left: 15px; z-index: 1001; background-color: white; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; padding: 8px 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
   `}</style>
@@ -70,6 +70,9 @@ function App() {
   
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Securely get the Stadia Maps API key from environment variables
+  const stadiaApiKey = import.meta.env.VITE_STADIA_API_KEY;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -207,11 +210,10 @@ function App() {
               </Button>
               <MapContainer center={itinerary?.center || [48.8566, 2.3522]} zoom={itinerary ? 13 : 8} style={{ height: '100%', width: '100%' }}>
                 {itinerary && <ChangeView center={itinerary.center} zoom={13} />}
-                {/* DEPLOYMENT FIX: Using the standard, reliable OpenStreetMap layer */}
                 <TileLayer
-                  url="https://tiles.stadiamaps.com/tiles/stamen_toner/{z}/{x}/{y}{r}.png"
-                  attribution= '&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://stamen.com/" target="_blank">Stamen Design</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
-                    />
+                  url={`https://tiles.stadiamaps.com/tiles/stamen_toner/{z}/{x}/{y}{r}.png?api_key=${stadiaApiKey}`}
+                  attribution='&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://www.stamen.com/" target="_blank">Stamen Design</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                />
                 {itinerary?.days.flatMap(day => day.locations).map((location, index) => (
                   <Marker position={location.coords} key={index}>
                     <Popup>
